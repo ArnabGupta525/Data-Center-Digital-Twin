@@ -1,2 +1,33 @@
-.idea
-__pycache__
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# JetBrains / DataSpell / PyCharm IDE configs
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# SQLite databases
+*.db
+
+# Logs
+*.log
+logs/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Python packaging/build artifacts
+build/
+dist/
+*.egg-info/
