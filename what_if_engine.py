@@ -69,6 +69,7 @@ class WhatIfEngineController:
             "total_daily_cost_usd": (total_facility_power_w / 1000 * 0.12 * 24),
             "cooling_strategy": strategy,
             "individual_outlet_temps": [r['outlet_temp_c'] for r in individual_results],
+            "individual_workloads": [p['server_workload_percent'] for p in final_payloads],
             "total_compute_output": total_compute_output
         }
         self.view.update_dashboard(aggregated_results)

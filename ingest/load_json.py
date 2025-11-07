@@ -10,7 +10,7 @@ from db.db_utils import get_conn, insert_telemetry_row
 from ingest.normalizer import normalize_doc, record_tuple_from_normalized
 
 DB_PATH = "db/telemetry.db"
-INPUT = "data/datacenter_full_state_list.json"
+INPUT = "data/sample.json"
 
 def main():
     if not os.path.exists(INPUT):
