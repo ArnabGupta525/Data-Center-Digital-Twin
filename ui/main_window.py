@@ -1,128 +1,11 @@
-# from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, 
-#                              QHBoxLayout, QLabel, QSlider, QFrame, QGridLayout, QCheckBox)
-# from PyQt5.QtCore import Qt, pyqtSignal
-
-# class MainWindow(QMainWindow):
-#     """
-#     The main UI window. Now includes checkboxes and smarter signal handling.
-#     """
-#     simulation_requested = pyqtSignal()
-
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("Data Center 'What-If' Engine")
-#         self.setGeometry(100, 100, 1000, 600)
-
-#         self.central_widget = QWidget()
-#         self.setCentralWidget(self.central_widget)
-#         self.layout = QHBoxLayout(self.central_widget)
-
-#         self._create_control_panel()
-#         self._create_dashboard_panel()
-
-#     def _create_control_panel(self):
-#         control_panel = QFrame()
-#         control_panel.setFrameShape(QFrame.StyledPanel)
-#         control_layout = QVBoxLayout(control_panel)
-#         title = QLabel("Global 'What-If' Overrides")
-#         title.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 10px;")
-#         control_layout.addWidget(title)
-
-#         self.workload_slider = self._create_slider("Avg Server Workload (%)", 0, 100, 50)
-#         control_layout.addLayout(self.workload_slider['layout'])
-#         self.inlet_slider = self._create_slider("Global Inlet Temp (°C)", 15, 30, 22)
-#         control_layout.addLayout(self.inlet_slider['layout'])
-#         self.ambient_slider = self._create_slider("Global Ambient Temp (°C)", 10, 45, 25)
-#         control_layout.addLayout(self.ambient_slider['layout'])
-
-#         control_layout.addStretch()
-#         self.layout.addWidget(control_panel, 1)
-
-#     def _handle_slider_interaction(self, checkbox):
-#         """
-#         NEW: This is a 'slot' that checks the checkbox state before emitting a signal.
-#         It ensures that moving a slider only triggers an update if its override is active.
-#         """
-#         if checkbox.isChecked():
-#             self.simulation_requested.emit()
-
-#     def _create_slider(self, name, min_val, max_val, initial_val):
-#         """Helper to create a checkbox, label, and slider group with corrected logic."""
-#         checkbox = QCheckBox()
-#         checkbox.setChecked(False)
-#         label = QLabel(f"{name}: {initial_val}")
-#         slider = QSlider(Qt.Horizontal)
-#         slider.setRange(min_val, max_val)
-#         slider.setValue(initial_val)
-        
-#         # Connect slider movement to updating its own label's text
-#         slider.valueChanged.connect(lambda value: label.setText(f"{name}: {value}"))
-        
-#         # --- THE FIX ---
-#         # Toggling the checkbox will always trigger a simulation update.
-#         checkbox.stateChanged.connect(self.simulation_requested.emit)
-        
-#         # Moving the slider will now call our new handler method, which is smarter.
-#         slider.valueChanged.connect(lambda: self._handle_slider_interaction(checkbox))
-        
-#         layout = QHBoxLayout()
-#         layout.addWidget(checkbox)
-#         layout.addWidget(label, 1)
-#         layout.addWidget(slider, 2)
-#         return {"layout": layout, "slider": slider, "label": label, "checkbox": checkbox}
-
-#     def _create_dashboard_panel(self):
-#         # This function remains unchanged.
-#         dashboard_panel = QFrame()
-#         dashboard_panel.setFrameShape(QFrame.StyledPanel)
-#         dashboard_layout = QVBoxLayout(dashboard_panel)
-#         title = QLabel("Aggregated Datacenter Metrics")
-#         title.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 10px;")
-#         dashboard_layout.addWidget(title)
-#         grid_layout = QGridLayout()
-#         self.result_labels = {}
-#         metrics = [
-#             "Total Server Power (kW)", "Total Cooling Power (kW)", "Average PUE",
-#             "MAX Outlet Temp (°C)", "Projected Daily Cost (USD)", "Cooling Strategy"
-#         ]
-#         for i, metric_name in enumerate(metrics):
-#             name_label = QLabel(metric_name)
-#             name_label.setStyleSheet("font-weight: bold;")
-#             value_label = QLabel("N/A")
-#             value_label.setStyleSheet("font-size: 18px; color: #337ab7;")
-#             grid_layout.addWidget(name_label, i, 0)
-#             grid_layout.addWidget(value_label, i, 1)
-#             self.result_labels[metric_name] = value_label
-#         dashboard_layout.addLayout(grid_layout)
-#         dashboard_layout.addStretch()
-#         self.layout.addWidget(dashboard_panel, 2)
-    
-#     def update_dashboard(self, results):
-#         # This function remains unchanged.
-#         self.result_labels["Total Server Power (kW)"].setText(f"{results.get('total_server_power_kw', 0):.2f} kW")
-#         self.result_labels["Total Cooling Power (kW)"].setText(f"{results.get('total_cooling_power_kw', 0):.2f} kW")
-#         self.result_labels["Average PUE"].setText(f"{results.get('average_pue', 0):.3f}")
-#         self.result_labels["MAX Outlet Temp (°C)"].setText(f"{results.get('max_outlet_temp_c', 0):.2f} °C")
-#         self.result_labels["Projected Daily Cost (USD)"].setText(f"$ {results.get('total_daily_cost_usd', 0):,.2f}")
-#         self.result_labels["Cooling Strategy"].setText(results.get('cooling_strategy', 'N/A'))
-        
-#         pue = results.get('average_pue', 0)
-#         pue_color = "green" if pue < 1.6 else "orange" if pue < 1.9 else "red"
-#         self.result_labels["Average PUE"].setStyleSheet(f"font-size: 18px; color: {pue_color}; font-weight: bold;")
-        
-#         max_temp = results.get('max_outlet_temp_c', 0)
-#         temp_color = "green" if max_temp < 35.5 else "orange" if max_temp < 37 else "red"
-#         self.result_labels["MAX Outlet Temp (°C)"].setStyleSheet(f"font-size: 18px; color: {temp_color}; font-weight: bold;")
-
 import sys
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
-                             QHBoxLayout, QLabel, QSlider, QFrame, QGridLayout, QCheckBox, QApplication, QScrollArea)
+                             QHBoxLayout, QLabel, QSlider, QFrame, QGridLayout, 
+                             QCheckBox, QApplication, QScrollArea, QPushButton,
+                             QSizePolicy, QComboBox)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPainter, QColor, QFont, QBrush, QPen
 from ui.dashboard_widgets import MetricGauge, TrendChart, AlertPanel, EnhancedHeatmap
-
-
-
 
 
 class StatusIndicator(QLabel):
@@ -154,13 +37,15 @@ class StatusIndicator(QLabel):
 class MainWindow(QMainWindow):
     """Enhanced main UI window with tabs, charts, and advanced visualizations."""
     simulation_requested = pyqtSignal()
+    suggest_tweaks_requested = pyqtSignal()
+    auto_optimize_requested = pyqtSignal()
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Data Center Digital Twin - Operations Console")
-        self.setGeometry(50, 50, 1800, 1000)
         self.setStyleSheet("""
             QMainWindow { background-color: #0F0F1E; }
+            
             QFrame { background-color: #1A1A2E; border-radius: 8px; border: 1px solid #2D2D4A; }
             QLabel { color: #ECF0F1; font-family: 'Segoe UI', Arial; }
             QSlider::groove:horizontal { background: #2D2D4A; height: 8px; border-radius: 4px; }
@@ -170,13 +55,71 @@ class MainWindow(QMainWindow):
             QCheckBox::indicator:checked { background-color: #4D96FF; border: 2px solid #4D96FF; border-radius: 3px; }
             QTabWidget::pane { border: 1px solid #2D2D4A; background: #0F0F1E; border-radius: 8px; }
             QTabBar::tab { background: #1A1A2E; color: #95A5A6; padding: 10px 20px; border: 1px solid #2D2D4A; 
-                          border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 2px; }
+                           border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 2px; }
             QTabBar::tab:selected { background: #28284B; color: #4D96FF; font-weight: bold; }
             QTabBar::tab:hover { background: #252545; }
+            
+            QPushButton {
+                background-color: #4D96FF;
+                color: #FFFFFF;
+                font-family: 'Segoe UI';
+                font-weight: bold;
+                font-size: 10px;
+                border-radius: 5px;
+                padding: 8px 12px;
+                border: 1px solid #4D96FF;
+            }
+            QPushButton:hover { background-color: #60A5FF; }
+            QPushButton:pressed { background-color: #3C80E0; }
+            QPushButton#suggest {
+                background-color: #1A1A2E;
+                border: 1px solid #4D96FF;
+                color: #4D96FF;
+            }
+            QPushButton#suggest:hover { background-color: #28284B; }
+            QPushButton#suggest:pressed { background-color: #3C80E0; color: #FFFFFF; }
+            
+            QComboBox {
+                background-color: #2D2D4A;
+                color: #ECF0F1;
+                padding: 5px 8px;
+                border-radius: 4px;
+                font-size: 9px;
+                border: 1px solid #3D3D5C;
+            }
+            QComboBox::drop-down { border: none; width: 15px; }
+            QComboBox QAbstractItemView {
+                background-color: #2D2D4A;
+                color: #ECF0F1;
+                selection-background-color: #4D96FF;
+                padding: 4px;
+            }
+            
+            QScrollBar:vertical {
+                background: #1A1A2E;
+                width: 12px;
+                margin: 0px 0px 0px 0px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background: #3D3D5C;
+                min-height: 20px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #4D96FF;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: none;
+                height: 0px;
+                subcontrol-origin: margin;
+            }
         """)
 
         self.central_widget = QWidget()
+        self.central_widget.setStyleSheet("background-color: #0F0F1E;") # Force dark background
         self.setCentralWidget(self.central_widget)
+        
         self.main_layout = QVBoxLayout(self.central_widget)
         self.main_layout.setSpacing(10)
         self.main_layout.setContentsMargins(10, 10, 10, 10)
@@ -192,19 +135,28 @@ class MainWindow(QMainWindow):
 
     def _create_overview_tab(self):
         """Main overview dashboard with key metrics and controls."""
-        overview = QWidget()
-        layout = QVBoxLayout(overview)
+        
+        overview_tab = QWidget()
+        tab_layout = QVBoxLayout(overview_tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.NoFrame)
+        tab_layout.addWidget(scroll_area)
+
+        scroll_content = QWidget()
+        scroll_area.setWidget(scroll_content)
+
+        layout = QVBoxLayout(scroll_content)
         layout.setSpacing(15)
         layout.setContentsMargins(15, 15, 15, 15)
 
-        # Top row: Controls and Key Metrics
         top_row = QHBoxLayout()
         
-        # Control Panel
         control_panel = self._create_control_panel()
         top_row.addWidget(control_panel, 1)
         
-        # Key Metrics Gauges
         gauges_panel = QFrame()
         gauges_layout = QHBoxLayout(gauges_panel)
         gauges_layout.setSpacing(15)
@@ -220,20 +172,16 @@ class MainWindow(QMainWindow):
         top_row.addWidget(gauges_panel, 2)
         layout.addLayout(top_row)
         
-        # Middle row: Summary metrics and alerts
         middle_row = QHBoxLayout()
         
-        # Summary panel
         summary_panel = self._create_summary_panel()
         middle_row.addWidget(summary_panel, 2)
         
-        # Alerts panel
         self.alert_panel = AlertPanel()
         middle_row.addWidget(self.alert_panel, 1)
         
         layout.addLayout(middle_row)
         
-        # Bottom: Mini heatmap
         heatmap_frame = QFrame()
         heatmap_layout = QVBoxLayout(heatmap_frame)
         heatmap_title = QLabel("Rack Thermal Overview")
@@ -245,7 +193,7 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(heatmap_frame)
         
-        self.tabs.addTab(overview, "📊 Overview")
+        self.tabs.addTab(overview_tab, "📊 Overview")
     
     def _create_control_panel(self):
         """Create the control panel with sliders."""
@@ -272,7 +220,44 @@ class MainWindow(QMainWindow):
         self.ambient_slider = self._create_slider_control("Global Ambient Temp (°C)", 10, 45, 25)
         layout.addLayout(self.ambient_slider['layout'])
 
-        layout.addStretch()
+        layout.addStretch(1) # Add space
+        
+        ai_title = QLabel("AI Optimization Engine")
+        ai_title.setStyleSheet("font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #4D96FF;")
+        layout.addWidget(ai_title)
+
+        profile_label = QLabel("Select Optimization Profile:")
+        profile_label.setStyleSheet("font-size: 9px; color: #95A5A6;")
+        layout.addWidget(profile_label)
+        
+        self.profile_selector = QComboBox()
+        self.profile_selector.addItems(["Balanced (Best Value)", "Greedy (Max Compute)", "Sustainable (Min Cost)"])
+        layout.addWidget(self.profile_selector)
+
+        self.suggestion_label = QLabel("Run 'Suggest Tweaks' for AI co-pilot.")
+        self.suggestion_label.setStyleSheet("font-size: 9px; color: #BDC3C7; padding: 5px; border: 1px dashed #2D2D4A; border-radius: 4px; margin-top: 5px;")
+        self.suggestion_label.setWordWrap(True)
+        self.suggestion_label.setMinimumHeight(40)
+        layout.addWidget(self.suggestion_label)
+        
+        button_layout = QHBoxLayout()
+        button_layout.setContentsMargins(0, 5, 0, 0)
+        
+        self.suggest_button = QPushButton("💡 Suggest Tweaks")
+        self.suggest_button.setObjectName("suggest") # For styling
+        self.suggest_button.clicked.connect(self.suggest_tweaks_requested)
+        
+        self.optimize_button = QPushButton("✨ Auto-Optimize")
+        self.optimize_button.clicked.connect(self.auto_optimize_requested)
+        
+        button_layout.addWidget(self.suggest_button)
+        button_layout.addWidget(self.optimize_button)
+        
+        layout.addLayout(button_layout)
+        layout.addStretch(1)
+        
+        panel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        
         return panel
 
     def _handle_slider_interaction(self, checkbox):
@@ -361,8 +346,20 @@ class MainWindow(QMainWindow):
 
     def _create_analytics_tab(self):
         """Analytics tab with trend charts."""
-        analytics = QWidget()
-        layout = QVBoxLayout(analytics)
+        
+        analytics_tab = QWidget()
+        tab_layout = QVBoxLayout(analytics_tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.NoFrame)
+        tab_layout.addWidget(scroll_area)
+
+        scroll_content = QWidget()
+        scroll_area.setWidget(scroll_content)
+
+        layout = QVBoxLayout(scroll_content)
         layout.setSpacing(15)
         layout.setContentsMargins(15, 15, 15, 15)
 
@@ -370,27 +367,31 @@ class MainWindow(QMainWindow):
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #4D96FF; margin-bottom: 8px;")
         layout.addWidget(title)
 
-        # Top row charts
         top_charts = QHBoxLayout()
         
-        self.pue_chart = TrendChart("PUE Trend", max_points=60, y_label="PUE", color="#4D96FF")
-        self.temp_chart = TrendChart("Temperature Trend", max_points=60, y_label="°C", color="#E74C3C")
+        # --- UPDATED: Pass static range and goal text to charts ---
+        self.pue_chart = TrendChart("PUE Trend", max_points=60, y_label="PUE", color="#4D96FF", 
+                                    forecast_steps=30, goal_text="Lower is Better", y_min=1.0, y_max=2.5)
+        
+        self.temp_chart = TrendChart("Temperature Trend", max_points=60, y_label="°C", color="#E74C3C", 
+                                     forecast_steps=30, goal_text="Lower is Better", y_min=30, y_max=50)
         
         top_charts.addWidget(self.pue_chart)
         top_charts.addWidget(self.temp_chart)
         layout.addLayout(top_charts)
 
-        # Bottom row charts
         bottom_charts = QHBoxLayout()
+        self.power_chart = TrendChart("Total Power Trend", max_points=60, y_label="kW", color="#2ECC71", 
+                                      forecast_steps=30, goal_text="Lower is Better", y_min=1000, y_max=2000)
         
-        self.power_chart = TrendChart("Total Power Trend", max_points=60, y_label="kW", color="#2ECC71")
-        self.cost_chart = TrendChart("Cost Trend", max_points=60, y_label="USD/day", color="#F1C40F")
+        self.cost_chart = TrendChart("Cost Trend", max_points=60, y_label="USD/day", color="#F1C40F", 
+                                     forecast_steps=30, goal_text="Lower is Better", y_min=3000, y_max=6000)
+        # --- End of Update ---
         
         bottom_charts.addWidget(self.power_chart)
         bottom_charts.addWidget(self.cost_chart)
         layout.addLayout(bottom_charts)
 
-        # Efficiency insights
         insights_frame = QFrame()
         insights_layout = QVBoxLayout(insights_frame)
         insights_title = QLabel("Efficiency Insights")
@@ -398,18 +399,31 @@ class MainWindow(QMainWindow):
         insights_layout.addWidget(insights_title)
         
         self.insights_label = QLabel("Analyzing datacenter performance...")
-        self.insights_label.setStyleSheet("font-size: 10px; color: #BDC3C7; padding: 8px;")
+        # --- UPDATED: Increased font size ---
+        self.insights_label.setStyleSheet("font-size: 11px; color: #BDC3C7; padding: 8px;")
         self.insights_label.setWordWrap(True)
         insights_layout.addWidget(self.insights_label)
         
         layout.addWidget(insights_frame)
         
-        self.tabs.addTab(analytics, "📈 Analytics")
+        self.tabs.addTab(analytics_tab, "📈 Analytics")
     
     def _create_thermal_tab(self):
         """Thermal management tab with detailed heatmap."""
-        thermal = QWidget()
-        layout = QVBoxLayout(thermal)
+        
+        thermal_tab = QWidget()
+        tab_layout = QVBoxLayout(thermal_tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.NoFrame)
+        tab_layout.addWidget(scroll_area)
+
+        scroll_content = QWidget()
+        scroll_area.setWidget(scroll_content)
+
+        layout = QVBoxLayout(scroll_content)
         layout.setSpacing(15)
         layout.setContentsMargins(15, 15, 15, 15)
 
@@ -417,7 +431,6 @@ class MainWindow(QMainWindow):
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #4D96FF; margin-bottom: 8px;")
         layout.addWidget(title)
 
-        # Legend
         legend_layout = QHBoxLayout()
         legend_label = QLabel("Temperature Status:")
         legend_label.setStyleSheet("color: #BDC3C7; font-size: 10px; font-weight: bold;")
@@ -437,14 +450,11 @@ class MainWindow(QMainWindow):
         legend_layout.addStretch()
         layout.addLayout(legend_layout)
 
-        # Heatmap
         self.heatmap = EnhancedHeatmap(rows=20, cols=35)
         layout.addWidget(self.heatmap)
 
-        # Thermal stats
         stats_frame = QFrame()
         stats_layout = QHBoxLayout(stats_frame)
-        
         self.thermal_stats_labels = {}
         for stat_name in ["Hottest Rack", "Coldest Rack", "Avg Temp", "Racks in Warning", "Racks Critical"]:
             stat_container = QVBoxLayout()
@@ -459,11 +469,21 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(stats_frame)
         
-        self.tabs.addTab(thermal, "🌡️ Thermal")
+        self.tabs.addTab(thermal_tab, "🌡️ Thermal")
 
-    def update_dashboard(self, results):
-        """Update all dashboard elements with new simulation results."""
-        # Extract values
+    def show_calibration_message(self):
+        """Displays the 'Calibrating' message on startup."""
+        self.alert_panel.add_alert("ML Engine: CALIBRATING... Please wait.", "info")
+        self.insights_label.setText("ML Engine is calibrating...\nThis may take a moment as it learns 'normal' operations.")
+
+    def hide_calibration_message(self):
+        """Hides the 'Calibrating' message and shows 'Online'."""
+        self.alert_panel.add_alert("ML Engine: CALIBRATED. System online.", "good")
+
+    def update_dashboard(self, results, forecasts={}):
+        """
+        Update all dashboard elements with new simulation results.
+        """
         server_power = results.get('total_server_power_kw', 0)
         cooling_power = results.get('total_cooling_power_kw', 0)
         total_power = server_power + cooling_power
@@ -475,7 +495,6 @@ class MainWindow(QMainWindow):
         temps = results.get('individual_outlet_temps', [])
         workloads = results.get('individual_workloads', [])
 
-        # Update text labels
         self.result_labels["Total Server Power (kW)"].setText(f"{server_power:.1f} kW")
         self.result_labels["Total Cooling Power (kW)"].setText(f"{cooling_power:.1f} kW")
         self.result_labels["Average PUE"].setText(f"{pue:.2f}")
@@ -483,18 +502,15 @@ class MainWindow(QMainWindow):
         self.result_labels["Total Compute Output"].setText(f"{compute_output:,.0f}")
         self.result_labels["Projected Daily Cost (USD)"].setText(f"${daily_cost:,.0f}")
         
-        # Clean up strategy text
-        clean_strategy = strategy.replace("[bold red]", "").replace("[/bold red]", "")
-        clean_strategy = clean_strategy.replace("[bold yellow]", "").replace("[/bold yellow]", "")
-        clean_strategy = clean_strategy.replace("[bold green]", "").replace("[/bold green]", "")
+        clean_strategy = strategy.replace("[bold red]", "").replace("[bold red]", "")
+        clean_strategy = clean_strategy.replace("[bold yellow]", "").replace("[bold yellow]", "")
+        clean_strategy = clean_strategy.replace("[bold green]", "").replace("[bold green]", "")
         self.result_labels["Cooling Strategy"].setText(clean_strategy)
 
-        # Update gauges
         self.pue_gauge.set_value(pue)
         self.temp_gauge.set_value(max_temp)
         self.power_gauge.set_value(total_power)
 
-        # Update status indicators with better logic
         pue_status = "good" if pue < 1.6 else "warning" if pue < 1.9 else "critical"
         pue_text = "✓ Excellent" if pue_status == "good" else "⚠ Fair" if pue_status == "warning" else "✗ Poor"
         self.status_indicators["Average PUE"][0].update_status(pue_status, pue_text)
@@ -503,46 +519,43 @@ class MainWindow(QMainWindow):
         temp_text = "✓ Normal" if temp_status == "good" else "⚠ High" if temp_status == "warning" else "✗ Critical"
         self.status_indicators["MAX Outlet Temp (°C)"][0].update_status(temp_status, temp_text)
 
-        # Power status based on total facility power
         power_status = "good" if total_power < 1200 else "warning" if total_power < 1600 else "critical"
         power_text = "✓ Normal" if power_status == "good" else "⚠ High" if power_status == "warning" else "✗ Very High"
         self.status_indicators["Total Server Power (kW)"][0].update_status(power_status, power_text)
         self.status_indicators["Total Cooling Power (kW)"][0].update_status(power_status, power_text)
         
-        # Compute and cost always show as info
         self.status_indicators["Total Compute Output"][0].update_status("neutral", "")
         self.status_indicators["Projected Daily Cost (USD)"][0].update_status("neutral", "")
         self.status_indicators["Cooling Strategy"][0].update_status("neutral", "")
 
-        # Update heatmaps
         self.heatmap.update_data(temps, workloads)
         self.overview_heatmap.update_data(temps, workloads)
 
-        # Update trend charts
         self.pue_chart.add_data_point(pue)
         self.temp_chart.add_data_point(max_temp)
         self.power_chart.add_data_point(total_power)
         self.cost_chart.add_data_point(daily_cost)
 
-        # Update thermal stats
+        if forecasts:
+            self.pue_chart.update_forecast_data(forecasts.get('pue', []))
+            self.temp_chart.update_forecast_data(forecasts.get('temp', []))
+            self.power_chart.update_forecast_data(forecasts.get('power', []))
+            self.cost_chart.update_forecast_data(forecasts.get('cost', []))
+
         if temps:
-            avg_temp = sum(temps) / len(temps)
-            hottest_idx = temps.index(max(temps))
-            coldest_idx = temps.index(min(temps))
+            avg_temp = sum(temps) / len(temps) if temps else 0
+            hottest_idx = temps.index(max(temps)) if temps else 0
+            coldest_idx = temps.index(min(temps)) if temps else 0
             warning_count = sum(1 for t in temps if 35.5 <= t < 37.0)
             critical_count = sum(1 for t in temps if t >= 37.0)
 
-            self.thermal_stats_labels["Hottest Rack"].setText(f"#{hottest_idx + 1} ({max(temps):.1f}°C)")
-            self.thermal_stats_labels["Coldest Rack"].setText(f"#{coldest_idx + 1} ({min(temps):.1f}°C)")
+            self.thermal_stats_labels["Hottest Rack"].setText(f"#{hottest_idx + 1} ({max(temps) if temps else 'N/A':.1f}°C)")
+            self.thermal_stats_labels["Coldest Rack"].setText(f"#{coldest_idx + 1} ({min(temps) if temps else 'N/A':.1f}°C)")
             self.thermal_stats_labels["Avg Temp"].setText(f"{avg_temp:.1f}°C")
             
-            # Color code warning/critical counts
             warning_label = self.thermal_stats_labels["Racks in Warning"]
             warning_label.setText(f"{warning_count}")
-            if warning_count > 50:
-                warning_label.setStyleSheet("font-size: 11px; color: #F39C12; font-weight: bold;")
-            else:
-                warning_label.setStyleSheet("font-size: 11px; color: #ECF0F1; font-weight: bold;")
+            warning_label.setStyleSheet(f"font-size: 11px; color: {'#F39C12' if warning_count > 50 else '#ECF0F1'}; font-weight: bold;")
             
             critical_label = self.thermal_stats_labels["Racks Critical"]
             critical_label.setText(f"{critical_count}")
@@ -553,46 +566,35 @@ class MainWindow(QMainWindow):
             else:
                 critical_label.setStyleSheet("font-size: 11px; color: #2ECC71; font-weight: bold;")
 
-        # Generate alerts (only add new ones, avoid spam)
-        if pue > 2.0:
-            self.alert_panel.add_alert(f"PUE critical at {pue:.2f} - Cooling inefficient", "critical")
-        elif pue > 1.9:
-            self.alert_panel.add_alert(f"PUE elevated at {pue:.2f} - Review cooling", "warning")
-        
-        if max_temp > 40.0:
-            self.alert_panel.add_alert(f"Extreme temperature: {max_temp:.1f}°C - Immediate action required", "critical")
-        elif max_temp > 37.0:
-            self.alert_panel.add_alert(f"Critical temperature: {max_temp:.1f}°C", "critical")
-        elif max_temp > 35.5:
-            self.alert_panel.add_alert(f"Temperature elevated: {max_temp:.1f}°C", "warning")
-        
-        if critical_count > 50:
-            self.alert_panel.add_alert(f"{critical_count} racks critical - System overload", "critical")
-        elif critical_count > 20:
-            self.alert_panel.add_alert(f"{critical_count} racks in critical state", "warning")
-        
-        if total_power > 1800:
-            self.alert_panel.add_alert(f"Power consumption very high: {total_power:.0f} kW", "critical")
-        elif total_power > 1600:
-            self.alert_panel.add_alert(f"Power consumption elevated: {total_power:.0f} kW", "warning")
+        if pue > 2.0: self.alert_panel.add_alert(f"PUE critical at {pue:.2f} - Cooling inefficient", "critical")
+        elif pue > 1.9: self.alert_panel.add_alert(f"PUE elevated at {pue:.2f} - Review cooling", "warning")
+        if max_temp > 40.0: self.alert_panel.add_alert(f"Extreme temperature: {max_temp:.1f}°C - Immediate action required", "critical")
+        elif max_temp > 37.0: self.alert_panel.add_alert(f"Critical temperature: {max_temp:.1f}°C", "critical")
+        elif max_temp > 35.5: self.alert_panel.add_alert(f"Temperature elevated: {max_temp:.1f}°C", "warning")
+        if critical_count > 50: self.alert_panel.add_alert(f"{critical_count} racks critical - System overload", "critical")
+        elif critical_count > 20: self.alert_panel.add_alert(f"{critical_count} racks in critical state", "warning")
+        if total_power > 1800: self.alert_panel.add_alert(f"Power consumption very high: {total_power:.0f} kW", "critical")
+        elif total_power > 1600: self.alert_panel.add_alert(f"Power consumption elevated: {total_power:.0f} kW", "warning")
 
-        # Update efficiency insights
-        efficiency_score = 100 - ((pue - 1.0) * 50)
-        thermal_score = 100 - max(0, (max_temp - 30) * 5)
-        overall_score = (efficiency_score + thermal_score) / 2
+        if hasattr(self, 'insights_label'):
+             # Logic to update insights label
+            if "ML Engine is calibrating" in self.insights_label.text() and len(forecasts) > 0:
+                 self.insights_label.setText("ML Engine is online. Analyzing performance...")
+            
+            if len(forecasts) > 0: # Only show insights if ML is running
+                efficiency_score = 100 - ((pue - 1.0) * 50)
+                thermal_score = 100 - max(0, (max_temp - 30) * 5)
+                overall_score = (efficiency_score + thermal_score) / 2
 
-        insights = f"Overall Efficiency Score: {overall_score:.0f}/100\n\n"
-        insights += f"• PUE Efficiency: {efficiency_score:.0f}/100 "
-        insights += f"({'Excellent' if pue < 1.6 else 'Good' if pue < 1.8 else 'Needs Improvement'})\n"
-        insights += f"• Thermal Management: {thermal_score:.0f}/100 "
-        insights += f"({'Optimal' if max_temp < 35 else 'Acceptable' if max_temp < 37 else 'Critical'})\n"
-        insights += f"• Estimated Annual Cost: ${daily_cost * 365:,.0f}\n\n"
-        
-        if pue > 1.8:
-            insights += "💡 Recommendation: Reduce cooling overhead by optimizing airflow or using free cooling.\n"
-        if max_temp > 36:
-            insights += "💡 Recommendation: Increase cooling capacity or reduce workload on hot racks.\n"
-        if overall_score > 80:
-            insights += "✓ Datacenter is operating efficiently!"
-        
-        self.insights_label.setText(insights)
+                insights = f"Overall Efficiency Score: {overall_score:.0f}/100\n\n"
+                insights += f"• PUE Efficiency: {efficiency_score:.0f}/100 "
+                insights += f"({'Excellent' if pue < 1.6 else 'Good' if pue < 1.8 else 'Needs Improvement'})\n"
+                insights += f"• Thermal Management: {thermal_score:.0f}/100 "
+                insights += f"({'Optimal' if max_temp < 35 else 'Acceptable' if max_temp < 37 else 'Critical'})\n"
+                insights += f"• Estimated Annual Cost: ${daily_cost * 365:,.0f}\n\n"
+                
+                if pue > 1.8: insights += "💡 Recommendation: Reduce cooling overhead or optimize airflow.\n"
+                if max_temp > 36: insights += "💡 Recommendation: Increase cooling capacity or reduce workload on hot racks.\n"
+                if overall_score > 80: insights += "✓ Datacenter is operating efficiently!"
+                
+                self.insights_label.setText(insights)
