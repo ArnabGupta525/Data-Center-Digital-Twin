@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QCheckBox, QApplication, QScrollArea, QPushButton,
                              QSizePolicy, QComboBox)
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPainter, QColor, QFont, QBrush, QPen
+from PyQt5.QtGui import QPainter, QColor, QFont, QBrush, QPen, QPalette
 from ui.dashboard_widgets import MetricGauge, TrendChart, AlertPanel, EnhancedHeatmap
 
 
@@ -21,17 +21,17 @@ class StatusIndicator(QLabel):
         if text is not None:
             self.setText(text)
 
-        font = QFont("Segoe UI", 10, QFont.Bold)
+        font = QFont("Segoe UI", 11, QFont.Bold)
         self.setFont(font)
 
         if status == "good":
-            self.setStyleSheet("color: #2ECC71; font-weight: bold; font-size: 10px;")
+            self.setStyleSheet("font-family: 'Segoe UI'; color: #2ECC71; font-weight: bold; font-size: 11px;")
         elif status == "warning":
-            self.setStyleSheet("color: #F39C12; font-weight: bold; font-size: 10px;")
+            self.setStyleSheet("font-family: 'Segoe UI'; color: #F39C12; font-weight: bold; font-size: 11px;")
         elif status == "critical":
-            self.setStyleSheet("color: #E74C3C; font-weight: bold; font-size: 10px;")
+            self.setStyleSheet("font-family: 'Segoe UI'; color: #E74C3C; font-weight: bold; font-size: 11px;")
         else:
-            self.setStyleSheet("color: #7F8C8D; font-weight: normal; font-size: 10px;")
+            self.setStyleSheet("font-family: 'Segoe UI'; color: #7F8C8D; font-weight: normal; font-size: 11px;")
 
 
 class MainWindow(QMainWindow):
@@ -64,16 +64,16 @@ class MainWindow(QMainWindow):
                 color: #FFFFFF;
                 font-family: 'Segoe UI';
                 font-weight: bold;
-                font-size: 10px;
-                border-radius: 5px;
-                padding: 8px 12px;
+                font-size: 11px;
+                border-radius: 6px;
+                padding: 10px 16px;
                 border: 1px solid #4D96FF;
             }
             QPushButton:hover { background-color: #60A5FF; }
             QPushButton:pressed { background-color: #3C80E0; }
             QPushButton#suggest {
                 background-color: #1A1A2E;
-                border: 1px solid #4D96FF;
+                border: 2px solid #4D96FF;
                 color: #4D96FF;
             }
             QPushButton#suggest:hover { background-color: #28284B; }
@@ -82,17 +82,37 @@ class MainWindow(QMainWindow):
             QComboBox {
                 background-color: #2D2D4A;
                 color: #ECF0F1;
-                padding: 5px 8px;
-                border-radius: 4px;
-                font-size: 9px;
+                padding: 10px 14px;
+                border-radius: 5px;
+                font-family: 'Segoe UI';
+                font-size: 11px;
                 border: 1px solid #3D3D5C;
             }
-            QComboBox::drop-down { border: none; width: 15px; }
+            QComboBox::drop-down { 
+                border: none; 
+                width: 20px; 
+            }
             QComboBox QAbstractItemView {
-                background-color: #2D2D4A;
+                background-color: #1A1A2E;
                 color: #ECF0F1;
                 selection-background-color: #4D96FF;
-                padding: 4px;
+                selection-color: #FFFFFF;
+                border: 1px solid #3D3D5C;
+                padding: 5px;
+                outline: none;
+            }
+            QComboBox QAbstractItemView::item {
+                background-color: #1A1A2E;
+                color: #ECF0F1;
+                padding: 8px 12px;
+                border: none;
+            }
+            QComboBox QAbstractItemView::item:selected {
+                background-color: #4D96FF;
+                color: #FFFFFF;
+            }
+            QComboBox QAbstractItemView::item:hover {
+                background-color: #28284B;
             }
             
             QScrollBar:vertical {
@@ -149,17 +169,19 @@ class MainWindow(QMainWindow):
         scroll_area.setWidget(scroll_content)
 
         layout = QVBoxLayout(scroll_content)
-        layout.setSpacing(15)
-        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(20)
+        layout.setContentsMargins(20, 20, 20, 20)
 
         top_row = QHBoxLayout()
+        top_row.setSpacing(20)
         
         control_panel = self._create_control_panel()
         top_row.addWidget(control_panel, 1)
         
         gauges_panel = QFrame()
         gauges_layout = QHBoxLayout(gauges_panel)
-        gauges_layout.setSpacing(15)
+        gauges_layout.setSpacing(20)
+        gauges_layout.setContentsMargins(10, 10, 10, 10)
         
         self.pue_gauge = MetricGauge("PUE", 1.0, 3.0, "", 1.6, 1.9, reverse_colors=True)
         self.temp_gauge = MetricGauge("Max Temp", 20, 50, "°C", 35.5, 37.0, reverse_colors=True)
@@ -169,13 +191,14 @@ class MainWindow(QMainWindow):
         gauges_layout.addWidget(self.temp_gauge)
         gauges_layout.addWidget(self.power_gauge)
         
-        top_row.addWidget(gauges_panel, 2)
+        top_row.addWidget(gauges_panel, 1)
         layout.addLayout(top_row)
         
         middle_row = QHBoxLayout()
+        middle_row.setSpacing(20)
         
         summary_panel = self._create_summary_panel()
-        middle_row.addWidget(summary_panel, 2)
+        middle_row.addWidget(summary_panel, 1)
         
         self.alert_panel = AlertPanel()
         middle_row.addWidget(self.alert_panel, 1)
@@ -184,8 +207,9 @@ class MainWindow(QMainWindow):
         
         heatmap_frame = QFrame()
         heatmap_layout = QVBoxLayout(heatmap_frame)
+        heatmap_layout.setContentsMargins(20, 20, 20, 20)
         heatmap_title = QLabel("Rack Thermal Overview")
-        heatmap_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #4D96FF; margin-bottom: 4px;")
+        heatmap_title.setStyleSheet("font-family: 'Segoe UI'; font-size: 13px; font-weight: bold; color: #4D96FF; margin-bottom: 10px;")
         heatmap_layout.addWidget(heatmap_title)
         
         self.overview_heatmap = EnhancedHeatmap(rows=20, cols=35)
@@ -199,15 +223,15 @@ class MainWindow(QMainWindow):
         """Create the control panel with sliders."""
         panel = QFrame()
         layout = QVBoxLayout(panel)
-        layout.setSpacing(12)
-        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
 
         title = QLabel("What-If Scenario Controls")
-        title.setStyleSheet("font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #4D96FF;")
+        title.setStyleSheet("font-family: 'Segoe UI'; font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #4D96FF;")
         layout.addWidget(title)
 
         desc = QLabel("☑ Enable overrides to simulate conditions")
-        desc.setStyleSheet("font-size: 8px; color: #7F8C8D; margin-bottom: 10px;")
+        desc.setStyleSheet("font-family: 'Segoe UI'; font-size: 10px; color: #95A5A6; margin-bottom: 12px;")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -223,25 +247,37 @@ class MainWindow(QMainWindow):
         layout.addStretch(1) # Add space
         
         ai_title = QLabel("AI Optimization Engine")
-        ai_title.setStyleSheet("font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #4D96FF;")
+        ai_title.setStyleSheet("font-family: 'Segoe UI'; font-size: 13px; font-weight: bold; margin-bottom: 8px; margin-top: 10px; color: #4D96FF;")
         layout.addWidget(ai_title)
 
         profile_label = QLabel("Select Optimization Profile:")
-        profile_label.setStyleSheet("font-size: 9px; color: #95A5A6;")
+        profile_label.setStyleSheet("font-family: 'Segoe UI'; font-size: 11px; color: #95A5A6; margin-bottom: 5px;")
         layout.addWidget(profile_label)
         
         self.profile_selector = QComboBox()
         self.profile_selector.addItems(["Balanced (Best Value)", "Greedy (Max Compute)", "Sustainable (Min Cost)"])
+        
+        # Force dark background on dropdown list view
+        view = self.profile_selector.view()
+        palette = view.palette()
+        palette.setColor(QPalette.Base, QColor("#1A1A2E"))
+        palette.setColor(QPalette.Text, QColor("#ECF0F1"))
+        palette.setColor(QPalette.Highlight, QColor("#4D96FF"))
+        palette.setColor(QPalette.HighlightedText, QColor("#FFFFFF"))
+        palette.setColor(QPalette.Window, QColor("#1A1A2E"))
+        view.setPalette(palette)
+        
         layout.addWidget(self.profile_selector)
 
         self.suggestion_label = QLabel("Run 'Suggest Tweaks' for AI co-pilot.")
-        self.suggestion_label.setStyleSheet("font-size: 9px; color: #BDC3C7; padding: 5px; border: 1px dashed #2D2D4A; border-radius: 4px; margin-top: 5px;")
+        self.suggestion_label.setStyleSheet("font-family: 'Segoe UI'; font-size: 11px; color: #BDC3C7; padding: 12px; border: 1px dashed #3D3D5C; border-radius: 5px; margin-top: 10px;")
         self.suggestion_label.setWordWrap(True)
-        self.suggestion_label.setMinimumHeight(40)
+        self.suggestion_label.setMinimumHeight(55)
         layout.addWidget(self.suggestion_label)
         
         button_layout = QHBoxLayout()
-        button_layout.setContentsMargins(0, 5, 0, 0)
+        button_layout.setContentsMargins(0, 10, 0, 0)
+        button_layout.setSpacing(10)
         
         self.suggest_button = QPushButton("💡 Suggest Tweaks")
         self.suggest_button.setObjectName("suggest") # For styling
@@ -270,10 +306,10 @@ class MainWindow(QMainWindow):
         checkbox.setStyleSheet("QCheckBox::indicator { width: 18px; height: 18px; }")
 
         label = QLabel(f"{name}: {initial_val}")
-        label.setStyleSheet("color: #ECF0F1; font-size: 10px;")
+        label.setStyleSheet("font-family: 'Segoe UI'; color: #ECF0F1; font-size: 11px;")
 
         value_display = QLabel(f"{initial_val}")
-        value_display.setStyleSheet("color: #4D96FF; font-size: 11px; font-weight: bold; min-width: 35px;")
+        value_display.setStyleSheet("font-family: 'Segoe UI'; color: #4D96FF; font-size: 13px; font-weight: bold; min-width: 45px;")
 
         slider = QSlider(Qt.Horizontal)
         slider.setRange(min_val, max_val)
@@ -288,11 +324,12 @@ class MainWindow(QMainWindow):
         slider.valueChanged.connect(lambda: self._handle_slider_interaction(checkbox))
 
         layout = QHBoxLayout()
+        layout.setSpacing(8)
         layout.addWidget(checkbox)
         layout.addWidget(label, 0)
         layout.addWidget(value_display, 0)
         layout.addWidget(slider, 2)
-        layout.setContentsMargins(0, 5, 0, 5)
+        layout.setContentsMargins(0, 6, 0, 6)
 
         return {"layout": layout, "slider": slider, "label": label, "checkbox": checkbox}
 
@@ -300,15 +337,15 @@ class MainWindow(QMainWindow):
         """Create summary metrics panel."""
         panel = QFrame()
         layout = QVBoxLayout(panel)
-        layout.setSpacing(12)
-        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
 
         title = QLabel("Current Metrics")
-        title.setStyleSheet("font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #4D96FF;")
+        title.setStyleSheet("font-family: 'Segoe UI'; font-size: 13px; font-weight: bold; margin-bottom: 10px; color: #4D96FF;")
         layout.addWidget(title)
 
         grid = QGridLayout()
-        grid.setSpacing(12)
+        grid.setSpacing(15)
         grid.setContentsMargins(0, 0, 0, 0)
 
         self.result_labels = {}
@@ -326,10 +363,10 @@ class MainWindow(QMainWindow):
 
         for i, (name, metric_type) in enumerate(metrics):
             name_label = QLabel(name)
-            name_label.setStyleSheet("font-size: 9px; color: #95A5A6; font-weight: 600;")
+            name_label.setStyleSheet("font-family: 'Segoe UI'; font-size: 11px; color: #95A5A6; font-weight: 600;")
 
             value_label = QLabel("N/A")
-            value_label.setStyleSheet("font-size: 12px; font-weight: bold; color: #ECF0F1;")
+            value_label.setStyleSheet("font-family: 'Segoe UI'; font-size: 14px; font-weight: bold; color: #ECF0F1;")
 
             status_label = StatusIndicator("", "neutral")
 

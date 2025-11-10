@@ -23,8 +23,8 @@ class MetricGauge(QWidget):
         self.good_threshold = good_threshold
         self.warning_threshold = warning_threshold
         self.reverse_colors = reverse_colors
-        self.setMinimumSize(140, 170)
-        self.setMaximumSize(180, 190)
+        self.setMinimumSize(160, 200)
+        self.setMaximumSize(220, 240)
         
     def set_value(self, value):
         self.current_value = max(self.min_val, min(self.max_val, value))
@@ -36,13 +36,13 @@ class MetricGauge(QWidget):
         
         rect = self.rect()
         center_x = rect.width() / 2
-        center_y = rect.height() / 2 - 30
-        radius = min(rect.width(), rect.height()) / 2 - 35
+        center_y = rect.height() / 2 - 25
+        radius = min(rect.width(), rect.height()) / 2 - 40
         
         # Draw title above gauge
-        painter.setPen(QColor("#7F8C8D"))
-        painter.setFont(QFont("Segoe UI", 9))
-        painter.drawText(QRectF(0, 5, rect.width(), 20), Qt.AlignCenter, self.title)
+        painter.setPen(QColor("#95A5A6"))
+        painter.setFont(QFont("Segoe UI", 11, QFont.Bold))
+        painter.drawText(QRectF(0, 8, rect.width(), 25), Qt.AlignCenter, self.title)
         
         # Draw background arc
         painter.setPen(QPen(QColor("#3D3D5C"), 8, Qt.SolidLine, Qt.RoundCap))
@@ -79,17 +79,110 @@ class MetricGauge(QWidget):
         painter.drawArc(int(center_x - radius), int(center_y - radius),
                         int(radius * 2), int(radius * 2), start_angle, int(270 * value_ratio * 16))
         
-        # Draw value text below the gauge
-        painter.setPen(color)
-        painter.setFont(QFont("Segoe UI", 18, QFont.Bold))
-        value_text = f"{self.current_value:.2f}"
-        value_y_position = center_y + radius + 15
-        painter.drawText(QRectF(0, value_y_position, rect.width(), 30), Qt.AlignCenter, value_text)
+        # Draw icon in center of gauge (within the circle)
+        icon_color = QColor("#4D4D6E")
         
-        # Draw unit below the value
-        painter.setFont(QFont("Segoe UI", 8))
-        painter.setPen(QColor("#7F8C8D"))
-        painter.drawText(QRectF(0, value_y_position + 25, rect.width(), 20), Qt.AlignCenter, self.unit)
+        # Choose icon based on title with custom drawing
+        if "PUE" in self.title:
+            # Draw a lightning bolt for efficiency
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(icon_color)
+            
+            bolt_path = QPainterPath()
+            bolt_x = center_x
+            bolt_y = center_y - 2
+            
+            # Lightning bolt shape
+            bolt_path.moveTo(bolt_x + 2, bolt_y - 12)
+            bolt_path.lineTo(bolt_x - 6, bolt_y)
+            bolt_path.lineTo(bolt_x - 1, bolt_y)
+            bolt_path.lineTo(bolt_x - 4, bolt_y + 12)
+            bolt_path.lineTo(bolt_x + 6, bolt_y - 2)
+            bolt_path.lineTo(bolt_x + 1, bolt_y - 2)
+            bolt_path.closeSubpath()
+            
+            painter.drawPath(bolt_path)
+            
+        elif "Temp" in self.title:
+            # Draw a simple thermometer shape
+            painter.setPen(QPen(icon_color, 3))
+            painter.setBrush(Qt.NoBrush)
+            therm_x = center_x
+            therm_y = center_y - 5
+            # Thermometer bulb (circle at bottom)
+            painter.drawEllipse(int(therm_x - 6), int(therm_y + 8), 12, 12)
+            # Thermometer tube (rectangle)
+            painter.drawRect(int(therm_x - 2), int(therm_y - 10), 4, 18)
+            # Fill the bulb
+            painter.setBrush(icon_color)
+            painter.setPen(Qt.NoPen)
+            painter.drawEllipse(int(therm_x - 4), int(therm_y + 10), 8, 8)
+            
+        elif "Power" in self.title:
+            # Draw a power/gear icon
+            painter.setPen(QPen(icon_color, 2))
+            painter.setBrush(Qt.NoBrush)
+            
+            gear_x = center_x
+            gear_y = center_y - 2
+            gear_radius = 10
+            
+            # Draw outer gear circle
+            painter.drawEllipse(int(gear_x - gear_radius), int(gear_y - gear_radius), 
+                              gear_radius * 2, gear_radius * 2)
+            
+            # Draw gear teeth (8 teeth)
+            for i in range(8):
+                angle = (i * 45) * 3.14159 / 180
+                x1 = gear_x + gear_radius * math.cos(angle)
+                y1 = gear_y + gear_radius * math.sin(angle)
+                x2 = gear_x + (gear_radius + 4) * math.cos(angle)
+                y2 = gear_y + (gear_radius + 4) * math.sin(angle)
+                painter.drawLine(int(x1), int(y1), int(x2), int(y2))
+            
+            # Draw center circle
+            painter.setBrush(icon_color)
+            painter.setPen(Qt.NoPen)
+            painter.drawEllipse(int(gear_x - 4), int(gear_y - 4), 8, 8)
+            
+        else:
+            painter.setPen(icon_color)
+            painter.setFont(QFont("Segoe UI", 26))
+            icon = "●"
+            painter.drawText(QRectF(0, center_y - 13, rect.width(), 35), Qt.AlignCenter, icon)
+        
+        # Draw value text with unit inline
+        painter.setPen(color)
+        painter.setFont(QFont("Segoe UI", 22, QFont.Bold))
+        value_text = f"{self.current_value:.2f}"
+        
+        # Calculate text width for centering
+        metrics = painter.fontMetrics()
+        value_width = metrics.horizontalAdvance(value_text)
+        
+        value_y_position = center_y + radius + 25
+        
+        if self.unit:
+            # Calculate combined width to center both together
+            painter.setFont(QFont("Segoe UI", 14))
+            unit_metrics = painter.fontMetrics()
+            unit_width = unit_metrics.horizontalAdvance(self.unit)
+            total_width = value_width + unit_width + 8
+            
+            # Draw value
+            painter.setFont(QFont("Segoe UI", 22, QFont.Bold))
+            painter.setPen(color)
+            value_x = center_x - total_width / 2
+            painter.drawText(QRectF(value_x, value_y_position, value_width + 15, 35), Qt.AlignLeft | Qt.AlignVCenter, value_text)
+            
+            # Draw unit next to value
+            painter.setFont(QFont("Segoe UI", 14))
+            painter.setPen(QColor("#95A5A6"))
+            unit_x = value_x + value_width + 8
+            painter.drawText(QRectF(unit_x, value_y_position + 5, unit_width + 15, 35), Qt.AlignLeft | Qt.AlignVCenter, self.unit)
+        else:
+            # Just draw value centered
+            painter.drawText(QRectF(0, value_y_position, rect.width(), 35), Qt.AlignCenter, value_text)
 
 
 class TrendChart(QWidget):
@@ -293,11 +386,11 @@ class AlertPanel(QFrame):
         """)
         
         layout = QVBoxLayout(self)
-        layout.setSpacing(8)
-        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
+        layout.setContentsMargins(20, 20, 20, 20)
         
         title = QLabel("System Alerts")
-        title.setStyleSheet("font-size: 12px; font-weight: bold; color: #4D96FF;")
+        title.setStyleSheet("font-family: 'Segoe UI'; font-size: 13px; font-weight: bold; color: #4D96FF; margin-bottom: 5px;")
         layout.addWidget(title)
         
         self.alerts_layout = QVBoxLayout()
@@ -329,12 +422,13 @@ class AlertPanel(QFrame):
         
         alert_widget = QLabel(f"{icons.get(severity, 'ℹ')} {message}")
         alert_widget.setStyleSheet(f"""
+            font-family: 'Segoe UI';
             color: {colors.get(severity, '#4D96FF')};
-            font-size: 9px;
-            padding: 5px 7px;
+            font-size: 10px;
+            padding: 8px 10px;
             background-color: rgba(255, 255, 255, 0.03);
             border-left: 3px solid {colors.get(severity, '#4D96FF')};
-            border-radius: 3px;
+            border-radius: 4px;
         """)
         alert_widget.setWordWrap(True)
         
