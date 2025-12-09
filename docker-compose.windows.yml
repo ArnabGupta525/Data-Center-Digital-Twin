@@ -1,0 +1,34 @@
+# Windows-specific docker-compose override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.windows.yml up
+
+services:
+  datacenter-twin:
+    environment:
+      # Windows X Server (VcXsrv) typically runs on host.docker.internal:0
+      - DISPLAY=host.docker.internal:0.0
+      - QT_X11_NO_MITSHM=1
+      - QT_DEBUG_PLUGINS=0
+    
+    volumes:
+      # Windows paths - adjust as needed
+      - ./data:/data:ro
+      - ./db:/app/db
+      - ./models:/app/models
+      - ./logs:/app/logs
+      # Note: X11 socket mounting doesn't work on Windows
+      # Use VcXsrv or similar X server instead
+    
+    # Use bridge network on Windows (override host mode from base)
+    network_mode: bridge
+    
+    ports:
+      - "8765:8765"
+    
+    # Remove Linux-specific settings
+    security_opt: []
+    cap_add: []
+    devices: []
+    
+    extra_hosts:
+      # Allow container to reach host
+      - "host.docker.internal:host-gateway"

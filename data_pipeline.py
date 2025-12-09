@@ -20,6 +20,9 @@ class DataIngestor:
             with open(filepath, 'r') as f:
                 flat_data_list = json.load(f)
             
+            if not flat_data_list:
+                raise ValueError("Dataset is empty")
+            
             grouped_scenarios = defaultdict(list)
             for record in flat_data_list:
                 entity_id = record['meta_data']['entityId']
@@ -28,11 +31,17 @@ class DataIngestor:
             self.scenarios = dict(grouped_scenarios)
             self.machine_ids = sorted(list(self.scenarios.keys()))
             
-            print(f"Data Ingestor loaded and grouped {len(self.machine_ids)} machines successfully.")
+            print(f"✓ Loaded {len(self.machine_ids)} machines from dataset")
 
         except FileNotFoundError:
-            print(f"[bold red]Error: '{filepath}' not found.[/bold red]")
-            exit()
+            print(f"⚠️  Dataset not found: '{filepath}'")
+            print("ℹ️  Tip: Place your 'datacenter_full_state_list.json' in the data/ directory")
+            print("ℹ️  Or run: python generate_sample_data.py")
+            raise
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f"❌ Error loading dataset: {e}")
+            print("ℹ️  Please check your dataset format (see DATASET-FORMAT.md)")
+            raise
 
     def get_state_from_plan(self, combination_plan):
         """Builds the full datacenter state from the combination plan."""

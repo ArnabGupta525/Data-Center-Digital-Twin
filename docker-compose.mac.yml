@@ -1,0 +1,29 @@
+# macOS-specific docker-compose override
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.mac.yml up
+
+services:
+  datacenter-twin:
+    environment:
+      # macOS X11 forwarding via XQuartz
+      - DISPLAY=host.docker.internal:0
+      - QT_X11_NO_MITSHM=1
+      - QT_DEBUG_PLUGINS=0
+    
+    volumes:
+      # macOS paths
+      - ./data:/data:ro
+      - ./db:/app/db
+      - ./models:/app/models
+      - ./logs:/app/logs
+      # XQuartz socket (if using socket-based forwarding)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    
+    # Use bridge network on macOS
+    network_mode: bridge
+    
+    ports:
+      - "8765:8765"
+    
+    extra_hosts:
+      # Allow container to reach host
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,69 @@
+services:
+  datacenter-twin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: datacenter-digital-twin:latest
+    container_name: datacenter-twin
+    
+    # Environment variables
+    environment:
+      # X11 Display (will be overridden by platform-specific compose files)
+      - DISPLAY=${DISPLAY:-:0}
+      # Qt platform plugin
+      - QT_X11_NO_MITSHM=1
+      - QT_DEBUG_PLUGINS=0
+      # Application settings
+      - PYTHONUNBUFFERED=1
+      # Force software rendering to avoid GPU driver issues on Linux
+      - LIBGL_ALWAYS_SOFTWARE=1
+    
+    # Volume mounts
+    volumes:
+      # Mount custom dataset directory (users can place their data here)
+      - ./data:/data:ro
+      # Persist database
+      - ./db:/app/db
+      # Persist trained models
+      - ./models:/app/models
+      # Persist logs
+      - ./logs:/app/logs
+      # X11 socket for GUI (Linux/macOS only)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    
+    # Network mode (Linux only, will be overridden on Windows/macOS)
+    network_mode: host
+    
+    # Security options
+    security_opt:
+      - seccomp:unconfined
+    
+    # Capabilities for GUI
+    cap_add:
+      - SYS_ADMIN
+    
+    # Device access (Linux only - GPU acceleration)
+    # Commented out for Windows/macOS compatibility
+    # devices:
+    #   - /dev/dri:/dev/dri
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Restart policy
+    restart: unless-stopped
+
+# Named volumes (alternative to bind mounts)
+volumes:
+  db-data:
+    driver: local
+  model-data:
+    driver: local
+  log-data:
+    driver: local
+
+# Networks (if needed for future expansion)
+networks:
+  default:
+    driver: bridge

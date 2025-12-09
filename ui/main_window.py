@@ -50,9 +50,9 @@ class MainWindow(QMainWindow):
             QLabel { color: #ECF0F1; font-family: 'Segoe UI', Arial; }
             QSlider::groove:horizontal { background: #2D2D4A; height: 8px; border-radius: 4px; }
             QSlider::handle:horizontal { background: #4D96FF; width: 18px; margin: -5px 0; border-radius: 9px; }
-            QCheckBox { color: #ECF0F1; }
-            QCheckBox::indicator { width: 18px; height: 18px; }
-            QCheckBox::indicator:checked { background-color: #4D96FF; border: 2px solid #4D96FF; border-radius: 3px; }
+            QCheckBox { color: #ECF0F1; spacing: 5px; }
+            QCheckBox::indicator { width: 18px; height: 18px; border: 1px solid #6c757d; border-radius: 3px; background-color: #1A1A2E; }
+            QCheckBox::indicator:checked { background-color: #4D96FF; border: 1px solid #4D96FF; }
             QTabWidget::pane { border: 1px solid #2D2D4A; background: #0F0F1E; border-radius: 8px; }
             QTabBar::tab { background: #1A1A2E; color: #95A5A6; padding: 10px 20px; border: 1px solid #2D2D4A; 
                            border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 2px; }
@@ -100,6 +100,14 @@ class MainWindow(QMainWindow):
                 border: 1px solid #3D3D5C;
                 padding: 5px;
                 outline: none;
+            }
+            QComboBox QListView {
+                background-color: #1A1A2E;
+                border: 1px solid #3D3D5C;
+            }
+            QComboBox QFrame {
+                background-color: #1A1A2E;
+                border: none;
             }
             QComboBox QAbstractItemView::item {
                 background-color: #1A1A2E;
@@ -267,6 +275,16 @@ class MainWindow(QMainWindow):
         palette.setColor(QPalette.Window, QColor("#1A1A2E"))
         view.setPalette(palette)
         
+        # Explicitly style the view widget to override any system/theme defaults requiring white background
+        view.setStyleSheet("""
+            QListView { 
+                background-color: #1A1A2E; 
+                color: #ECF0F1; 
+                border: 1px solid #3D3D5C; 
+                outline: none;
+            }
+        """)
+        
         layout.addWidget(self.profile_selector)
 
         self.suggestion_label = QLabel("Run 'Suggest Tweaks' for AI co-pilot.")
@@ -303,7 +321,7 @@ class MainWindow(QMainWindow):
     def _create_slider_control(self, name, min_val, max_val, initial_val):
         """Helper to create a checkbox, label, and slider group."""
         checkbox = QCheckBox()
-        checkbox.setStyleSheet("QCheckBox::indicator { width: 18px; height: 18px; }")
+        # Removed local stylesheet override to allow global style to apply (fixes visibility issue)
 
         label = QLabel(f"{name}: {initial_val}")
         label.setStyleSheet("font-family: 'Segoe UI'; color: #ECF0F1; font-size: 11px;")

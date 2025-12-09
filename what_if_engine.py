@@ -3,7 +3,8 @@ import random
 import math
 import warnings
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QTimer # Removed QThread
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QPalette, QColor
 
 # --- ML/Data Imports ---
 import pandas as pd
@@ -16,6 +17,7 @@ from twin.digital_twin_engine import compute_results
 from simulation.dynamics import StateRandomizer
 from ml_engine import MLEngine            
 # from ml_worker import MLCalibrationWorker # REMOVED
+from unity_bridge import UnityBridge
 
 class WhatIfEngineController:
     
@@ -27,6 +29,8 @@ class WhatIfEngineController:
         self.ingestor = DataIngestor()
         self.randomizer = StateRandomizer()
         self.current_ambient_temp = 25.0 
+
+        self.unity_bridge = UnityBridge() # Start the WebSocket server 
         
         # --- ML State Attributes ---
         self.simulation_step = 0
@@ -160,7 +164,40 @@ class WhatIfEngineController:
 
         individual_results = [compute_results(p) for p in final_payloads]
         if not individual_results: return
-        
+
+          # --- NEW: Send Data to Unity ---
+
+        unity_racks = []
+
+        for i, res in enumerate(individual_results):
+
+            temp = res['outlet_temp_c']
+
+            status = "Normal"
+
+            if temp > 37.0: status = "Critical"
+
+            elif temp > 35.5: status = "Warning"
+
+            rack_data = {
+
+                "id": f"Rack_{i}",
+
+                "index": i,
+
+                "temperature": temp,
+
+                "energy_usage": res['calculated_server_power_watts'],
+
+                "status": status
+
+            }
+
+            unity_racks.append(rack_data)
+
+        self.unity_bridge.send_update({"racks": unity_racks})
+
+
         total_server_power_w = sum(r['calculated_server_power_watts'] for r in individual_results)
         total_cooling_power_w = sum(r['cooling_unit_power_watts'] for r in individual_results)
         total_facility_power_w = total_server_power_w + total_cooling_power_w
@@ -216,6 +253,26 @@ class WhatIfEngineController:
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
+    
+    # --- GLOBAL DARK PALETTE FIX ---
+    # Fixes white background in popups/comboboxes on Linux/Wayland
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor("#0F0F1E"))
+    palette.setColor(QPalette.WindowText, QColor("#ECF0F1"))
+    palette.setColor(QPalette.Base, QColor("#1A1A2E"))
+    palette.setColor(QPalette.AlternateBase, QColor("#0F0F1E"))
+    palette.setColor(QPalette.ToolTipBase, QColor("#ECF0F1"))
+    palette.setColor(QPalette.ToolTipText, QColor("#ECF0F1"))
+    palette.setColor(QPalette.Text, QColor("#ECF0F1"))
+    palette.setColor(QPalette.Button, QColor("#1A1A2E"))
+    palette.setColor(QPalette.ButtonText, QColor("#ECF0F1"))
+    palette.setColor(QPalette.BrightText, QColor("#FF0000"))
+    palette.setColor(QPalette.Link, QColor("#4D96FF"))
+    palette.setColor(QPalette.Highlight, QColor("#4D96FF"))
+    palette.setColor(QPalette.HighlightedText, QColor("#FFFFFF"))
+    app.setPalette(palette)
+    # -------------------------------
+    
     controller = WhatIfEngineController()
     controller.view.showMaximized() # Use showMaximized() for fullscreen
     sys.exit(app.exec_())
